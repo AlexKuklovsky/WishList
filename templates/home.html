@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}WishList - Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    
+    thead {
+        background-color: #34495e;
+        color: white;
+    }
+    
+    th {
+        padding: 15px;
+        text-align: left;
+        font-weight: bold;
+        border: 1px solid #ddd;
+    }
+    
+    td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+    }
+    
+    tbody tr:nth-child(even) {
+        background-color: #ecf0f1;
+    }
+    
+    tbody tr:hover {
+        background-color: #d5dbdb;
+        transition: background-color 0.2s ease;
+    }
+    
+    a {
+        color: #2980b9;
+        text-decoration: none;
+    }
+    
+    a:hover {
+        text-decoration: underline;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .badge-wish {
+        background-color: #e74c3c;
+    }
+    
+    .badge-completed {
+        background-color: #27ae60;
+    }
+    
+    .priority-high {
+        color: #c0392b;
+        font-weight: bold;
+    }
+    
+    .priority-medium {
+        color: #f39c12;
+        font-weight: bold;
+    }
+    
+    .priority-low {
+        color: #27ae60;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <div style="padding:16px; border-bottom:1px solid #eee;">
+        <form action="/add" method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input name="id" placeholder="ID" required style="padding:8px;" />
+            <input name="Description" placeholder="Description" style="padding:8px;min-width:220px;" />
+            <input name="category" placeholder="Category" style="padding:8px;" />
+            <select name="status" style="padding:8px;">
+                <option value="WishList">WishList</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <select name="priority" style="padding:8px;">
+                <option value="1">1 - High</option>
+                <option value="2">2 - Medium</option>
+                <option value="3" selected>3 - Low</option>
+            </select>
+            <input name="timeFrame" placeholder="Time Frame" style="padding:8px;" />
+            <input name="link_url" placeholder="Link URL" style="padding:8px;min-width:200px;" />
+            <input name="date_added" placeholder="YYYY-MM-DD" style="padding:8px;" />
+            <button type="submit" style="padding:8px 12px;">Add</button>
+        </form>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Time Frame</th>
+                <th>Date Added</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td><strong>{{ item.id }}</strong></td>
+                <td>{{ item.Description }}</td>
+                <td>{{ item.category }}</td>
+                <td>
+                    {% if item.status == 'WishList' %}
+                        <span class="badge badge-wish">{{ item.status }}</span>
+                    {% elif item.status == 'Completed' %}
+                        <span class="badge badge-completed">{{ item.status }}</span>
+                    {% else %}
+                        <span class="badge">{{ item.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="{{ item.priority|priority_class }}">{{ item.priority|priority_label }}</span>
+                </td>
+                <td>{{ item.timeFrame }}</td>
+                <td>{{ item.date_added|format_date }}</td>
+                <td>
+                    {% if item.link_url %}
+                        <a href="{{ item.link_url }}" target="_blank">View</a>
+                        <form action="/remove" method="post" style="display:inline;margin-left:8px;">
+                            <input type="hidden" name="id" value="{{ item.id }}" />
+                            <button type="submit" onclick="return confirm('Remove item {{ item.id }}?')" style="padding:4px 8px;">Remove</button>
+                        </form>
+                    {% else %}
+                        <form action="/remove" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="{{ item.id }}" />
+                            <button type="submit" onclick="return confirm('Remove item {{ item.id }}?')" style="padding:4px 8px;">Remove</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

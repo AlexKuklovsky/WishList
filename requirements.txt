@@ -1,0 +1,4 @@
+Flask>=2.0
+
+# Optional: pin exact version in deployments
+# Flask==2.2.5
