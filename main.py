@@ -1,11 +1,17 @@
-from flask import Flask, render_template, request, jsonify, abort, redirect, url_for
+from flask import Flask, render_template, request, jsonify, abort, redirect, url_for, session
 from pathlib import Path
 import json
 from datetime import datetime
+from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-change-this-in-production'
 
 DATA_FILE = Path(__file__).parent / "WishList.json"
+
+# Hardcoded credentials
+ADMIN_USERNAME = 'admin'
+ADMIN_PASSWORD = 'password'
 
 
 def load_wishlist():
@@ -70,6 +76,37 @@ app.jinja_env.filters['priority_label'] = priority_label
 app.jinja_env.filters['priority_class'] = priority_class
 
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session or not session['logged_in']:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['logged_in'] = True
+            session['username'] = username
+            return redirect(url_for('home'))
+        else:
+            return render_template('login.html', error='Invalid username or password')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+
 @app.route('/')
 def home():
     items = load_wishlist()
@@ -88,6 +125,7 @@ def api_wishlist():
 
 
 @app.route('/add', methods=['POST'])
+@login_required
 def add_item():
     # support form (from HTML) and JSON payloads
     data = {}
@@ -124,6 +162,7 @@ def add_item():
 
 
 @app.route('/remove', methods=['POST'])
+@login_required
 def remove_item():
     if request.is_json:
         data = request.get_json()
@@ -143,6 +182,7 @@ def remove_item():
 
 
 @app.route('/manage')
+@login_required
 def manage():
     items = load_wishlist()
     try:
@@ -153,6 +193,7 @@ def manage():
 
 
 @app.route('/edit/<item_id>')
+@login_required
 def edit_item(item_id):
     items = load_wishlist()
     item = next((i for i in items if str(i.get('id')) == str(item_id)), None)
@@ -162,6 +203,7 @@ def edit_item(item_id):
 
 
 @app.route('/update/<item_id>', methods=['POST'])
+@login_required
 def update_item(item_id):
     data = {}
     if request.is_json:

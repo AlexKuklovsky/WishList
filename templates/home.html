@@ -88,6 +88,13 @@
 
 {% block content %}
 <div class="table-container">
+    {% if not session.get('logged_in') %}
+    <div style="padding:20px; background-color:#e8f4f8; border-bottom:2px solid #3498db; text-align:center;">
+        <strong>View Only Mode</strong> - <a href="{{ url_for('login') }}" style="color:#2980b9;">Login</a> to add, edit, or delete items.
+    </div>
+    {% endif %}
+
+    {% if session.get('logged_in') %}
     <div style="padding:16px; border-bottom:1px solid #eee;">
         <form action="/add" method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <input name="id" placeholder="ID" required style="padding:8px;" />
@@ -98,6 +105,18 @@
                 <option value="Completed">Completed</option>
                 <option value="Cancelled">Cancelled</option>
             </select>
+            <select name="priority" style="padding:8px;">
+                <option value="1">1 - High</option>
+                <option value="2">2 - Medium</option>
+                <option value="3" selected>3 - Low</option>
+            </select>
+            <input name="timeFrame" placeholder="Time Frame" style="padding:8px;" />
+            <input name="link_url" placeholder="Link URL" style="padding:8px;min-width:200px;" />
+            <input name="date_added" placeholder="YYYY-MM-DD" style="padding:8px;" />
+            <button type="submit" style="padding:8px 12px;">Add</button>
+        </form>
+    </div>
+    {% endif %}
             <select name="priority" style="padding:8px;">
                 <option value="1">1 - High</option>
                 <option value="2">2 - Medium</option>
@@ -143,17 +162,23 @@
                 <td>{{ item.timeFrame }}</td>
                 <td>{{ item.date_added|format_date }}</td>
                 <td>
-                    {% if item.link_url %}
-                        <a href="{{ item.link_url }}" target="_blank">View</a>
+                    {% if session.get('logged_in') %}
+                        {% if item.link_url %}
+                            <a href="{{ item.link_url }}" target="_blank">View</a>
+                            <a href="{{ url_for('edit_item', item_id=item.id) }}" style="margin-left:8px;">Edit</a>
+                        {% else %}
+                            <a href="{{ url_for('edit_item', item_id=item.id) }}">Edit</a>
+                        {% endif %}
                         <form action="/remove" method="post" style="display:inline;margin-left:8px;">
                             <input type="hidden" name="id" value="{{ item.id }}" />
                             <button type="submit" onclick="return confirm('Remove item {{ item.id }}?')" style="padding:4px 8px;">Remove</button>
                         </form>
                     {% else %}
-                        <form action="/remove" method="post" style="display:inline;">
-                            <input type="hidden" name="id" value="{{ item.id }}" />
-                            <button type="submit" onclick="return confirm('Remove item {{ item.id }}?')" style="padding:4px 8px;">Remove</button>
-                        </form>
+                        {% if item.link_url %}
+                            <a href="{{ item.link_url }}" target="_blank">View</a>
+                        {% else %}
+                            <span style="color:#999;">No link</span>
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
