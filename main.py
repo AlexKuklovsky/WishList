@@ -139,7 +139,52 @@ def remove_item():
     if len(new_items) == len(items):
         abort(404, 'item not found')
     save_wishlist(new_items)
-    return redirect(url_for('home'))
+    return redirect(url_for('manage'))
+
+
+@app.route('/manage')
+def manage():
+    items = load_wishlist()
+    try:
+        items = sorted(items, key=lambda i: (i.get('priority', 99), i.get('date_added') or '' ))
+    except Exception:
+        pass
+    return render_template('manage.html', items=items)
+
+
+@app.route('/edit/<item_id>')
+def edit_item(item_id):
+    items = load_wishlist()
+    item = next((i for i in items if str(i.get('id')) == str(item_id)), None)
+    if not item:
+        abort(404, 'item not found')
+    return render_template('edit.html', item=item)
+
+
+@app.route('/update/<item_id>', methods=['POST'])
+def update_item(item_id):
+    data = {}
+    if request.is_json:
+        data = request.get_json()
+    else:
+        data = request.form.to_dict()
+
+    items = load_wishlist()
+    item = next((i for i in items if str(i.get('id')) == str(item_id)), None)
+    if not item:
+        abort(404, 'item not found')
+
+    # Update item fields
+    item['Description'] = data.get('Description', item.get('Description', ''))
+    item['category'] = data.get('category', item.get('category', ''))
+    item['status'] = data.get('status', item.get('status', 'WishList'))
+    item['url'] = data.get('url', '') or data.get('link_url', '') or item.get('url', '')
+    item['link_url'] = data.get('link_url', '') or data.get('url', '') or item.get('link_url', '')
+    item['timeFrame'] = data.get('timeFrame', item.get('timeFrame', ''))
+    item['priority'] = int(data.get('priority')) if data.get('priority') else item.get('priority', 3)
+
+    save_wishlist(items)
+    return redirect(url_for('manage'))
 
 
 if __name__ == '__main__':

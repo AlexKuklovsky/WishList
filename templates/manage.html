@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}WishList - Manage{% endblock %}
+
+{% block extra_css %}
+<style>
+    .manage-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+        max-width: 800px;
+        margin: 20px auto;
+    }
+
+    .manage-header {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .manage-header h2 {
+        margin: 0;
+    }
+
+    .back-link {
+        display: inline-block;
+        padding: 8px 12px;
+        background-color: #95a5a6;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .back-link:hover {
+        background-color: #7f8c8d;
+    }
+
+    .wishes-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .wish-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.2s ease;
+    }
+
+    .wish-item:hover {
+        background-color: #f9f9f9;
+    }
+
+    .wish-item:last-child {
+        border-bottom: none;
+    }
+
+    .wish-title {
+        flex: 1;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .wish-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-edit {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background-color: #2980b9;
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background-color: #c0392b;
+    }
+
+    .empty-message {
+        padding: 40px;
+        text-align: center;
+        color: #7f8c8d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="manage-container">
+    <div class="manage-header">
+        <h2>Manage Wishes</h2>
+        <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
+    </div>
+
+    {% if items %}
+    <ul class="wishes-list">
+        {% for item in items %}
+        <li class="wish-item">
+            <span class="wish-title">{{ item.id }}</span>
+            <div class="wish-actions">
+                <a href="{{ url_for('edit_item', item_id=item.id) }}" class="btn btn-edit">Edit</a>
+                <form action="/remove" method="post" style="display:inline;">
+                    <input type="hidden" name="id" value="{{ item.id }}" />
+                    <button type="submit" class="btn btn-delete" onclick="return confirm('Delete {{ item.id }}?');">Delete</button>
+                </form>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-message">
+        <p>No wishes yet. <a href="{{ url_for('home') }}">Add one now!</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}WishList - Edit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 30px auto;
+        padding: 30px;
+    }
+
+    .edit-header {
+        margin-bottom: 30px;
+    }
+
+    .edit-header h2 {
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+    }
+
+    .edit-header p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    input[type="date"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="url"]:focus,
+    input[type="date"]:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+        justify-content: space-between;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-save {
+        background-color: #27ae60;
+        color: white;
+        flex: 1;
+    }
+
+    .btn-save:hover {
+        background-color: #229954;
+    }
+
+    .btn-cancel {
+        background-color: #95a5a6;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        flex: 1;
+    }
+
+    .btn-cancel:hover {
+        background-color: #7f8c8d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="edit-header">
+        <h2>Edit Wish</h2>
+        <p>ID: <strong>{{ item.id }}</strong></p>
+    </div>
+
+    <form action="{{ url_for('update_item', item_id=item.id) }}" method="post">
+        <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" id="description" name="Description" value="{{ item.Description or '' }}" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" value="{{ item.category or '' }}" />
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="WishList" {% if item.status == 'WishList' %}selected{% endif %}>WishList</option>
+                    <option value="Completed" {% if item.status == 'Completed' %}selected{% endif %}>Completed</option>
+                    <option value="Cancelled" {% if item.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <select id="priority" name="priority">
+                    <option value="1" {% if item.priority == 1 or item.priority == '1' %}selected{% endif %}>1 - High</option>
+                    <option value="2" {% if item.priority == 2 or item.priority == '2' %}selected{% endif %}>2 - Medium</option>
+                    <option value="3" {% if item.priority == 3 or item.priority == '3' %}selected{% endif %}>3 - Low</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="timeframe">Time Frame</label>
+                <input type="text" id="timeframe" name="timeFrame" value="{{ item.timeFrame or '' }}" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="link_url">Link URL</label>
+            <input type="url" id="link_url" name="link_url" value="{{ item.link_url or '' }}" />
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-save">Save Changes</button>
+            <a href="{{ url_for('manage') }}" class="btn btn-cancel">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
